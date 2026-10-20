@@ -7,19 +7,26 @@
     <title>Retro Shooter</title>
   </head>
   <body>
-    <main id="game">
-      <div id="hud"></div>
-      <div id="crosshair">+</div>
-      <section id="overlay">
-        <div class="card">
-          <h1 id="overlay-title"></h1>
-          <p id="overlay-text">
+    <main id="game"> <!-- Контейнер игры; сюда будет добавлен canvas Three.js. -->
+      
+      <div id="hud"> <!-- Контейнер интерфейса поверх 3D-сцены. -->
+        <div>Health: <span id="health">100</span></div> <!-- Показывает здоровье игрока. -->
+        <div>Ammo: <span id="ammo">20</span></div> <!-- Показывает оставшиеся патроны. -->
+        <div id="objective">Defeat enemies and find the exit</div> <!-- Показывает текущую цель. -->
+      </div>
+
+      <div id="crosshair">+</div> <!-- Прицел в центре экрана. -->
+      
+      <section id="overlay"> <!-- Стартовый экран и экран паузы/конца игры. -->
+        <div class="card"> <!-- Карточка с сообщением и кнопкой. -->
+          <h1 id="overlay-title">Retro Shooter</h1> <!-- Заголовок стартового экрана. -->
+          <p id="overlay-text"> <!-- Краткое описание управления. -->
             WASD to move, mouse to look, click to shoot.
           </p>
           <button id="start-button">Start game</button>
         </div>
       </section>
     </main>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/main.ts"></script> <!-- Загружает TypeScript-файл игры через Vite. -->
   </body>
 </html>
