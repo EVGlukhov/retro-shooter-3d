@@ -38,3 +38,11 @@ export type GameWorld = {
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
 };
+
+// Описываем прямоугольную площадку в мировых координатах.
+export type Platform = {
+  x: number; // Задаём координату центра площадки по оси X.
+  z: number; // Задаём координату центра площадки по оси Z.
+  width: number; // Задаём ширину площадки вдоль оси X.
+  depth: number; // Задаём глубину площадки вдоль оси Z.
+};

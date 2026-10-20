@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { cellToWorld, MAP, MAP_HEIGHT, MAP_WIDTH } from "./map";
+import { cellToWorld, MAP, MAP_HEIGHT, MAP_WIDTH, PLATFORMS } from "./map";
 import { PALETTE } from "./palette";
 import type { Enemy, GameState } from "./types";
 
@@ -27,19 +27,22 @@ export function buildLevel(
   camera: THREE.PerspectiveCamera,
   state: GameState,
 ): void {
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(MAP_WIDTH, MAP_HEIGHT), // Создаёт геометрию пола размером с карту.
-    new THREE.MeshStandardMaterial({
-      color: PALETTE.world.floor,
-      roughness: 0.9,
-    }), // Создаёт матовый серый материал пола.
-  );
-  // Поворачиваем плоскость из вертикального положения в горизонтальное.
-  floor.rotation.x = -Math.PI / 2;
-  // Чуть опускаем пол, чтобы не было мерцания с объектами на уровне y = 0.
-  floor.rotation.y = -0.05;
-  // Добавляем пол в сцену.
-  scene.add(floor);
+  for (const platform of PLATFORMS) {
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(platform.width, platform.depth), // Создаёт геометрию пола размером с карту.
+      new THREE.MeshStandardMaterial({
+        color: PALETTE.world.floor,
+        roughness: 0.9, // Делаем поверхность матовой.
+      }), // Создаёт матовый серый материал пола.
+    );
+
+    // Поворачиваем плоскость из вертикального положения в горизонтальное.
+    floor.rotation.x = -Math.PI / 2;
+    // Размещаем площадку по её центру.
+    floor.position.set(platform.x, 0, platform.z);
+    // Добавляем пол в сцену.
+    scene.add(floor);
+  }
 
   for (let row = 0; row < MAP.length; row++) {
     for (let column = 0; column < MAP[row].length; column++) {

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import type { Platform } from "./types";
 
 export const MAP = [
   "#############", // Верхняя граница карты: # означает стену.
@@ -10,6 +11,10 @@ export const MAP = [
   "#############", // Нижняя граница карты.
 ] as const;
 
+export const PLATFORMS: Platform[] = [
+  { x: -4, z: 0, width: 5, depth: 5.5 },
+  { x: 3, z: 0, width: 5, depth: 5.5 },
+];
 // Запоминаем ширину карты в клетках.
 export const MAP_WIDTH = MAP[0].length;
 // Запоминает высоту карты в клетках.
