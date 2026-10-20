@@ -19,6 +19,8 @@ export type GameState = {
   pitch: number;
   keysDown: Set<string>;
   exitPosition: THREE.Vector2;
+  verticalVelocity: number;
+  horizontalVelocity: THREE.Vector2;
 };
 
 export type GameUI = {

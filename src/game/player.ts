@@ -2,9 +2,26 @@ import { getCellAt } from "./map";
 import * as THREE from "three";
 import type { GameState } from "./types";
 
-const PLAYER_SPEED = 4;
-// Приблизительный радиус игрока для столкновений.
-const PLAYER_RADIUS = 0.2;
+// Задаём радиус игрока для проверки столкновения со стенами.
+const PLAYER_RADIUS = 0.2; // Увеличение значения отодвинет игрока от стен.
+
+// Задаём высоту камеры игрока, когда он стоит на полу.
+const GROUND_Y = 1.3; // Это значение совпадает с высотой старта игрока в уровне.
+
+// Задаём начальную скорость прыжка вверх.
+const JUMP_SPEED = 7; // Увеличение значения сделает прыжок выше.
+
+// Задаём силу гравитации, которая тянет игрока вниз.
+const GRAVITY = 20; // Увеличение значения ускорит падение.
+
+// Задаём обычную скорость движения по земле.
+const MAX_GROUND_SPEED = 4; // Это также желаемая скорость набора в выбранном направлении в воздухе.
+
+// Задаём силу управления направлением в воздухе.
+const AIR_ACCELERATION = 8; // Увеличение значения позволит быстрее набирать скорость при стрейфе.
+
+// Задаём силу замедления игрока на земле без нажатых клавиш движения.
+const GROUND_FRICTION = 10; // Увеличение значения быстрее остановит игрока.
 
 // Проверяем, может ли игрок занять позицию.
 function canStandAt(x: number, z: number): boolean {
@@ -34,45 +51,110 @@ export function updatePlayer(
   // Не перемещаем игрока во время меню или после завершения.
   if (!state.gameStarted || state.gameEnded) return;
 
+  // Проверяем, стоит ли игрок на уровне пола.
+  const onGround = camera.position.y <= GROUND_Y;
+
+  // Выполняем логику приземления и прыжка, только когда игрок на земле.
+  if (onGround) {
+    camera.position.y = GROUND_Y; // Точно ставим камеру на высоту пола.
+    state.verticalVelocity = 0; // Обнуляем скорость падения или подъёма после приземления.
+
+    if (state.keysDown.has("Space")) {
+      // Проверяем, удерживает ли игрок пробел.
+      state.verticalVelocity = JUMP_SPEED; // Придаём игроку скорость вверх для прыжка.
+    }
+  }
+
+  state.verticalVelocity -= GRAVITY * delta; // Уменьшаем вертикальную скорость под действием гравитации.
+  camera.position.y += state.verticalVelocity * delta; // Перемещаем камеру вверх или вниз.
+
+  if (camera.position.y < GROUND_Y) {
+    // Проверяем, не провалилась ли камера ниже пола.
+    camera.position.y = GROUND_Y; // Возвращаем камеру на уровень пола.
+    state.verticalVelocity = 0; // Обнуляем скорость по вертикали при приземлении.
+  }
+
   // Рассчитываем направление вперёд с учётом поворота.
-  const forward = new THREE.Vector3(
-    -Math.sin(state.yaw),
-    0,
-    -Math.cos(state.yaw),
-  );
+  const forward = new THREE.Vector2(-Math.sin(state.yaw), -Math.cos(state.yaw));
   // Рассчитываем направление вправо.
-  const right = new THREE.Vector3(Math.cos(state.yaw), 0, -Math.sin(state.yaw));
-  // Создаём пустой вектор движения на этот кадр.
-  const movement = new THREE.Vector3();
+  const right = new THREE.Vector2(Math.cos(state.yaw), -Math.sin(state.yaw));
+
+  // Создаём пустой вектор желаемого движения от клавиш.
+  const wishDirection = new THREE.Vector2();
 
   // Добавляем движение вперёд при зажатой W.
-  if (state.keysDown.has("KeyE")) movement.add(forward);
+  if (state.keysDown.has("KeyE")) wishDirection.add(forward);
   // Добавляем движение назад при зажатой S.
-  if (state.keysDown.has("KeyD")) movement.sub(forward);
+  if (state.keysDown.has("KeyD")) wishDirection.sub(forward);
   // Добавляем движение вправо при зажатой D.
-  if (state.keysDown.has("KeyF")) movement.add(right);
+  if (state.keysDown.has("KeyF")) wishDirection.add(right);
   // Добавляем движение влево при зажатой A.
-  if (state.keysDown.has("KeyS")) movement.sub(right);
+  if (state.keysDown.has("KeyS")) wishDirection.sub(right);
 
-  // Выходим, если игрок не нажал клавиши движения.
-  if (movement.lengthSq() === 0) return;
+  // Рассчитываем скорость, если нажата хотя бы одна клавиша движения.
+  if (wishDirection.lengthSq() > 0) {
+    wishDirection.normalize(); // Нормализуем направление, чтобы диагональ не давала бесплатное ускорение.
 
-  // Нормализуем диагональ и учитывает время кадра.
-  movement.normalize().multiplyScalar(PLAYER_SPEED * delta);
+    // Применяем обычное движение, когда игрок стоит на земле.
+    if (onGround) {
+      // Устанавливаем скорость в направлении нажатых клавиш.
+      state.horizontalVelocity
+        .copy(wishDirection)
+        .multiplyScalar(MAX_GROUND_SPEED);
+    } else {
+      // Измеряем текущую скорость в желаемом направлении.
+      const currentSpeedInWishDirection =
+        state.horizontalVelocity.dot(wishDirection);
+      // Вычисляем, сколько скорости ещё можно добавить в этом направлении.
+      const speedToAdd = MAX_GROUND_SPEED - currentSpeedInWishDirection;
+
+      // Добавляем ускорение, только если игрок ещё не достиг желаемой скорости по этому направлению.
+      if (speedToAdd > 0) {
+        // Ограничиваем ускорение временем кадра и оставшейся скоростью.
+        const acceleration = Math.min(AIR_ACCELERATION * delta, speedToAdd);
+        // Добавляем ускорение, сохраняя уже набранную скорость.
+        state.horizontalVelocity.addScaledVector(wishDirection, acceleration);
+      }
+    }
+  } else if (onGround) {
+    // Замедляем игрока только на земле и только без клавиш движения.
+    const speed = state.horizontalVelocity.length();
+    // Вычисляем потерю скорости за этот кадр.
+    const drop = speed * GROUND_FRICTION * delta;
+    // Не позволяем скорости стать отрицательной.
+    const newSpeed = Math.max(0, speed - drop);
+
+    // Проверяем, есть ли скорость, которую нужно уменьшить.
+    if (speed > 0) {
+      // Снижаем скорость, сохраняя направление движения.
+      state.horizontalVelocity.multiplyScalar(newSpeed / speed);
+    }
+  }
+
+  // Рассчитываем перемещение по мировой оси X за кадр.
+  const moveX = state.horizontalVelocity.x * delta;
+  // Рассчитываем перемещение по мировой оси Z за кадр.
+  const moveZ = state.horizontalVelocity.y * delta;
   // Вычисляем желаемую позицию по оси X.
-  const nextX = camera.position.x + movement.x;
+  const nextX = camera.position.x + moveX;
   // Вычисляем желаемую позицию по оси Z.
-  const nextZ = camera.position.z + movement.z;
+  const nextZ = camera.position.z + moveZ;
 
-  // Отдельно проверяем перемещение по X.
+  // Проверяем, свободен ли путь по оси X.
   if (canStandAt(nextX, camera.position.z)) {
     // Применяем движение по X, если там нет стены.
     camera.position.x = nextX;
+  } else {
+    // Убираем скорость в заблокированном направлении X.
+    state.horizontalVelocity.x = 0;
   }
 
-  // Отдельно проверяем перемещение по Z с учётом уже обновлённого X.
+  // Проверяем, свободен ли путь по оси Z.
   if (canStandAt(camera.position.x, nextZ)) {
     // Применяем движение по Z, если там нет стены.
     camera.position.z = nextZ;
+  } else {
+    // Убираем скорость в заблокированном направлении Z.
+    state.horizontalVelocity.y = 0;
   }
 }

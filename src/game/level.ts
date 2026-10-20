@@ -16,6 +16,8 @@ export function createGameState(): GameState {
     pitch: 0,
     keysDown: new Set<string>(),
     exitPosition: new THREE.Vector2(),
+    verticalVelocity: 0,
+    horizontalVelocity: new THREE.Vector2(),
   };
 }
 
