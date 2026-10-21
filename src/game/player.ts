@@ -24,7 +24,8 @@ const AIR_ACCELERATION = 8; // Увеличение значения позво�
 const GROUND_FRICTION = 10; // Увеличение значения быстрее остановит игрока.
 
 // Завершаем игру, если игрок упал ниже этой высоты.
-const FALL_DEATH_Y = -2;
+const FALL_DEATH_Y = -12;
+const FALL_DROP_TO_DIE = 2;
 
 type PlayerActions = {
   onFell: () => void;
@@ -58,6 +59,12 @@ export function updatePlayer(
 ): void {
   // Не перемещаем игрока во время меню или после завершения.
   if (!state.gameStarted || state.gameEnded) return;
+
+  const userData = camera.userData as { fallStartY?: number };
+
+  // Проверяем, стоял ли игрок на платформе в начале кадра.
+  const wasOnPlatformBeforeMove =
+    getPlatformHeightAt(camera.position.x, camera.position.z) !== undefined;
 
   // Ищем пол под текущей позицией игрока.
   const platformHeight = getPlatformHeightAt(
@@ -174,12 +181,35 @@ export function updatePlayer(
   state.verticalVelocity -= GRAVITY * delta;
   // Перемещаем игрока вверх или вниз.
   camera.position.y += state.verticalVelocity * delta;
-  // Проверяем площадку уже под новой горизонтальной позицией.
+
+  // Проверяем, есть ли платформа под игроком после перемещения.
   const landingHeight = getPlatformHeightAt(
     camera.position.x,
     camera.position.z,
   );
-  // Проверяем приземление только при падении.
+
+  // Если игрок только что ушёл с платформы — начинаем отслеживать падение.
+  if (wasOnPlatformBeforeMove && landingHeight === undefined) {
+    if (userData.fallStartY === undefined) {
+      userData.fallStartY = camera.position.y;
+    }
+  } else if (landingHeight !== undefined) {
+    // Если снова на платформе — сбрасываем отслеживание.
+    userData.fallStartY = undefined;
+  }
+
+  if (userData.fallStartY !== undefined) {
+    const fallDepth = camera.position.y - userData.fallStartY;
+
+    // Здесь убиваем только после реального падения.
+    if (fallDepth < -FALL_DROP_TO_DIE || camera.position.y < FALL_DEATH_Y) {
+      actions.onFell();
+      return;
+    }
+  }
+
+  // Если платформа есть, "схлопываем" игрока обратно на неё.
+  // Этот блок запускается только если под игроком реально есть платформа.
   if (landingHeight !== undefined && state.verticalVelocity <= 0) {
     // Вычисляем высоту камеры над площадкой.
     const landingCameraY = landingHeight + GROUND_Y;
@@ -189,10 +219,12 @@ export function updatePlayer(
       camera.position.y = landingCameraY;
       // Останавливаем падение.
       state.verticalVelocity = 0;
+      userData.fallStartY = undefined;
     }
   }
 
-  // Проверяем, упал ли игрок ниже порога уровня.
+  // Если платформы под игроком нет, значит он падает в яму/пропасть.
+  // И только когда он упал слишком низко — умирает.
   if (camera.position.y < FALL_DEATH_Y) {
     // Просим основной модуль завершить игру поражением.
     actions.onFell();

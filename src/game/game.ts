@@ -85,6 +85,7 @@ export function startGame(gameElement: HTMLElement): void {
     updateEnemies(world.camera, state, delta, {
       onPlayerDamaged: () => updateHud(state, ui),
       onPlayerDefeated: () => finishGame(false),
+      onEnemyDied: () => updateHud(state, ui),
     });
     // Вращает предметы и проверяет их сбор.
     updatePickups(world, state, delta, {

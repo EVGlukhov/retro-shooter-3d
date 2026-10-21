@@ -1,10 +1,11 @@
 import * as THREE from "three";
 import type { GameState } from "./types";
-import { getCellAt } from "./map";
+import { getCellAt, getPlatformHeightAt } from "./map";
 
 type EnemyActions = {
-  onPlayerDamaged: () => void;
-  onPlayerDefeated: () => void;
+  onPlayerDamaged(): void;
+  onPlayerDefeated(): void;
+  onEnemyDied(): void;
 };
 
 // Обновляем врагов каждый кадр.
@@ -14,17 +15,55 @@ export function updateEnemies(
   delta: number,
   actions: EnemyActions,
 ): void {
-  // Перебираем всех живых врагов.
-  for (const enemy of state.enemies) {
+  // Нужно идти по копии массива, потому что некоторых врагов можно удалить.
+  for (const enemy of [...state.enemies]) {
+    if (!enemy.alive) continue; // Пропускаем мёртвых врагов.
+
     // Уменьшаем оставшееся время до следующей атаки.
     enemy.attackCooldown -= delta;
 
+    const platformHeight = getPlatformHeightAt(
+      enemy.mesh.position.x,
+      enemy.mesh.position.z,
+    );
+
+    // Если платформы нет — враг падает.
+    if (platformHeight === undefined) {
+      // Увеличиваем вертикальную скорость врага из-за гравитации.
+      enemy.verticalVelocity -= 9.81 * delta;
+      // Перемещаем врага вниз.
+      enemy.mesh.position.y += enemy.verticalVelocity * delta;
+
+      if (enemy.mesh.position.y <= -5) {
+        enemy.alive = false; // Враг мёртв, если упал слишком низко.
+
+        enemy.mesh.parent?.remove(enemy.mesh); // Убираем меш врага из сцены.
+        state.enemies = state.enemies.filter((e) => e !== enemy); // Убираем врага из массива.
+
+        // Обновляем HUD после удаления врага
+        actions.onEnemyDied();
+
+        continue; // Переходим к следующему врагу.
+      }
+
+      continue; // Пропускаем остальную обработку, пока враг падает.
+    }
+
+    const groundY = platformHeight + 0.625; // Высота земли для врага (половина его высоты).
+    // Если враг ниже земли, ставим его на землю и сбрасываем вертикальную скорость.
+    if (enemy.mesh.position.y < groundY) {
+      enemy.mesh.position.y = groundY;
+      enemy.verticalVelocity = 0;
+    }
+
     // Вычисляем разницу между игроком и врагом по X.
     const dx = camera.position.x - enemy.mesh.position.x;
+    // Вычисляем разницу по Y
+    const dy = camera.position.y - enemy.mesh.position.y;
     // Вычисляем разницу по Z.
     const dz = camera.position.z - enemy.mesh.position.z;
     // Вычисляем горизонтальное расстояние между ними.
-    const distance = Math.hypot(dx, dz);
+    const distance = Math.hypot(dx, dy, dz);
 
     // Если враг ещё не подошёл достаточно близко.
     if (distance > 1.2) {
@@ -32,8 +71,18 @@ export function updateEnemies(
       const step = Math.min(1.2 * delta, distance - 1.1);
       // Рассчитываем новую координату врага по X.
       const nextX = enemy.mesh.position.x + (dx / distance) * step;
+      // Рассчитываем новую координату врага по Y.
+      const nextY = enemy.mesh.position.y + (dy / distance) * step;
       // Рассчитываем новую координату врага по Z.
       const nextZ = enemy.mesh.position.z + (dz / distance) * step;
+
+      // Если под новым местом есть платформа — выравниваем по ней.
+      const nextPlatformHeight = getPlatformHeightAt(nextX, nextZ);
+      if (nextPlatformHeight !== undefined) {
+        enemy.mesh.position.y = nextPlatformHeight + 0.625;
+      } else {
+        enemy.mesh.position.y = nextY;
+      }
 
       // Проверяет, не попадёт ли враг в стену при движении по X.
       if (getCellAt(nextX, enemy.mesh.position.z) !== "#") {

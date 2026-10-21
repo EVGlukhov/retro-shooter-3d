@@ -5,6 +5,8 @@ export type Enemy = {
   mesh: THREE.Mesh; // Хранит 3D-меш врага, который будет нарисован в сцене.
   health: number; // Хранит оставшееся здоровье врага.
   attackCooldown: number; // Хранит время до следующей атаки врага.
+  verticalVelocity: number; // Хранит вертикальную скорость врага для прыжков и падений.
+  alive: boolean; // Указывает, жив ли враг или мёртв.
 };
 
 export type GameState = {
