@@ -24,7 +24,7 @@ const AIR_ACCELERATION = 8; // Увеличение значения позво�
 const GROUND_FRICTION = 10; // Увеличение значения быстрее остановит игрока.
 
 // Завершаем игру, если игрок упал ниже этой высоты.
-const FALL_DEATH_Y = -5;
+const FALL_DEATH_Y = -2;
 
 type PlayerActions = {
   onFell: () => void;
