@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { cellToWorld, MAP, MAP_HEIGHT, MAP_WIDTH, PLATFORMS } from "./map";
+import { cellToWorld, MAP, PLATFORMS } from "./map";
 import { PALETTE } from "./palette";
 import type { Enemy, GameState } from "./types";
 

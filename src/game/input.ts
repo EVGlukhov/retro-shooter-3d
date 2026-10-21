@@ -3,6 +3,7 @@ import type { GameState, GameUI, GameWorld } from "./types";
 
 type InputActions = {
   shoot: () => void;
+  resetLevel: () => void;
 };
 
 export function setupInput(
@@ -15,16 +16,37 @@ export function setupInput(
 
   // Реагируем на клик по кнопке запуска.
   ui.startButton.addEventListener("click", function () {
+    if (state.gameEnded) {
+      actions.resetLevel();
+      requestAnimationFrame(() => {
+        renderer.domElement.requestPointerLock();
+      });
+      return;
+    }
+
     // Захватываем мышь, чтобы движение мыши управляло обзором.
-    renderer.domElement.requestPointerLock();
+    if (!state.gameStarted) {
+      renderer.domElement.requestPointerLock();
+    }
   });
 
   // Срабатывает, когда браузер захватывает или освобождает указатель.
   document.addEventListener("pointerlockchange", () => {
     // Определяем, захвачена ли мышь игровым canvas.
-    state.gameStarted = document.pointerLockElement === renderer.domElement;
-    // Скрываем overlay во время игры и показывает при паузе.
-    ui.overlay.classList.toggle("hidden", state.gameStarted);
+    const isLocked = document.pointerLockElement === renderer.domElement;
+
+    state.gameStarted = isLocked;
+
+    if (!isLocked && !state.gameEnded) {
+      ui.overlayTitle.textContent = "Paused";
+      ui.overlayText.textContent = "Press Continue to resume the game.";
+      ui.startButton.textContent = "Continue game";
+      ui.overlay.classList.remove("hidden");
+    }
+
+    if (isLocked) {
+      ui.overlay.classList.add("hidden");
+    }
   });
 
   // Получаем движения мыши.

@@ -6,14 +6,65 @@ import { buildLevel, createGameState } from "./level";
 import { updatePickups } from "./pickups";
 import { updatePlayer } from "./player";
 import { createWorld } from "./world";
+import * as THREE from "three";
 
 export function startGame(gameElement: HTMLElement): void {
   const ui = getGameUI();
-  const world = createWorld(gameElement);
-  const state = createGameState();
+  let world = createWorld(gameElement);
+  let state = createGameState();
 
   buildLevel(world.scene, world.camera, state);
   updateHud(state, ui);
+
+  function resetLevel(): void {
+    // Очищаем сцену от старого уровня.
+    const objectsToRemove: THREE.Object3D[] = [];
+
+    world.scene.traverse((child) => {
+      if (
+        child !== world.camera &&
+        !(child instanceof THREE.Light) &&
+        !(child instanceof THREE.Camera)
+      ) {
+        objectsToRemove.push(child);
+      }
+    });
+
+    for (const child of objectsToRemove) {
+      world.scene.remove(child);
+    }
+
+    // Сбрасываем состояние.
+    const freshState = createGameState();
+
+    // перезаписываем поля объекта state
+    Object.assign(state, freshState);
+
+    // Сбрасываем камеру.
+    world.camera.position.set(0, 1.3, 0);
+    world.camera.rotation.set(0, 0, 0);
+
+    // 4. сбрасываем специальные значения
+    state.yaw = 0;
+    state.pitch = 0;
+    state.verticalVelocity = 0;
+    state.horizontalVelocity.set(0, 0);
+    state.keysDown.clear();
+
+    ui.overlayTitle.textContent = "Retro Shooter";
+    ui.overlayText.textContent = "WASD to move, mouse to look, click to shoot.";
+    ui.startButton.textContent = "Start game";
+
+    // Пересоздаём уровень.
+    buildLevel(world.scene, world.camera, state);
+    // Сбрасываем HUD.
+    updateHud(state, ui);
+
+    // Сбрасываем overlay.
+    state.gameEnded = false;
+    state.gameStarted = false;
+    ui.overlay.classList.add("hidden");
+  }
 
   function finishGame(won: boolean): void {
     // Не позволяем повторно завершить уже законченную игру.
@@ -39,6 +90,7 @@ export function startGame(gameElement: HTMLElement): void {
 
   setupInput(world, state, ui, {
     shoot: () => shoot(world, state, ui),
+    resetLevel,
   });
 
   // Проверяет, добрался ли игрок до выхода после победы над врагами.
