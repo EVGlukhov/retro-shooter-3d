@@ -38,8 +38,8 @@ export function buildLevel(
 
     // Поворачиваем плоскость из вертикального положения в горизонтальное.
     floor.rotation.x = -Math.PI / 2;
-    // Размещаем площадку по её центру.
-    floor.position.set(platform.x, 0, platform.z);
+    // Размещаем плоскость на высоте поверхности платформы.
+    floor.position.set(platform.x, platform.y, platform.z);
     // Добавляем пол в сцену.
     scene.add(floor);
   }

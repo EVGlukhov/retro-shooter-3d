@@ -12,8 +12,8 @@ export const MAP = [
 ] as const;
 
 export const PLATFORMS: Platform[] = [
-  { x: -4, z: 0, width: 5, depth: 5.5 },
-  { x: 3, z: 0, width: 5, depth: 5.5 },
+  { x: -4, z: 0, y: 0, width: 5, depth: 5.5 },
+  { x: 3, z: 0, y: 0, width: 5, depth: 5.5 },
 ];
 // Запоминаем ширину карты в клетках.
 export const MAP_WIDTH = MAP[0].length;
@@ -52,4 +52,16 @@ export function getCellAt(x: number, z: number): string {
 
   // Возвращаем символ клетки, например #, ., P или E.
   return MAP[row][column];
+}
+
+// Ищем высоту платформы под переданной точкой.
+export function getPlatformHeightAt(x: number, z: number): number | undefined {
+  // Ищем площадку, чьи границы содержат эту точку.
+  const platform = PLATFORMS.find((candidate) => {
+    const insideX = Math.abs(x - candidate.x) <= candidate.width / 2; // Проверяем, находится ли точка в пределах ширины.
+    const insideZ = Math.abs(z - candidate.z) <= candidate.depth / 2;
+    return insideX && insideZ; // Проверяем, находится ли точка в пределах глубины.
+  });
+  // Возвращаем высоту платформы или undefined над ямой.
+  return platform?.y;
 }

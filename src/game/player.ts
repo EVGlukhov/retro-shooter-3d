@@ -1,4 +1,4 @@
-import { getCellAt } from "./map";
+import { getCellAt, getPlatformHeightAt } from "./map";
 import * as THREE from "three";
 import type { GameState } from "./types";
 
@@ -51,27 +51,31 @@ export function updatePlayer(
   // Не перемещаем игрока во время меню или после завершения.
   if (!state.gameStarted || state.gameEnded) return;
 
-  // Проверяем, стоит ли игрок на уровне пола.
-  const onGround = camera.position.y <= GROUND_Y;
+  // Ищем пол под текущей позицией игрока.
+  const platformHeight = getPlatformHeightAt(
+    camera.position.x,
+    camera.position.z,
+  );
+  // Вычисляем высоту камеры стоящего игрока.
+  const groundCameraY =
+    platformHeight === undefined ? undefined : platformHeight + GROUND_Y;
 
-  // Выполняем логику приземления и прыжка, только когда игрок на земле.
-  if (onGround) {
-    camera.position.y = GROUND_Y; // Точно ставим камеру на высоту пола.
-    state.verticalVelocity = 0; // Обнуляем скорость падения или подъёма после приземления.
+  // Считаем игрока стоящим, если под ним есть платформа и он падает на неё.
+  let onGround =
+    groundCameraY !== undefined &&
+    camera.position.y <= groundCameraY &&
+    state.verticalVelocity <= 0;
 
+  // Если игрок приземлился, ставим его точно на платформу.
+  if (onGround && groundCameraY !== undefined) {
+    camera.position.y = groundCameraY;
+    state.verticalVelocity = 0;
+
+    // Начинаем прыжок, если пробел удерживается.
     if (state.keysDown.has("Space")) {
-      // Проверяем, удерживает ли игрок пробел.
-      state.verticalVelocity = JUMP_SPEED; // Придаём игроку скорость вверх для прыжка.
+      state.verticalVelocity = JUMP_SPEED;
+      onGround = false;
     }
-  }
-
-  state.verticalVelocity -= GRAVITY * delta; // Уменьшаем вертикальную скорость под действием гравитации.
-  camera.position.y += state.verticalVelocity * delta; // Перемещаем камеру вверх или вниз.
-
-  if (camera.position.y < GROUND_Y) {
-    // Проверяем, не провалилась ли камера ниже пола.
-    camera.position.y = GROUND_Y; // Возвращаем камеру на уровень пола.
-    state.verticalVelocity = 0; // Обнуляем скорость по вертикали при приземлении.
   }
 
   // Рассчитываем направление вперёд с учётом поворота.
@@ -156,5 +160,27 @@ export function updatePlayer(
   } else {
     // Убираем скорость в заблокированном направлении Z.
     state.horizontalVelocity.y = 0;
+  }
+
+  // Применяем гравитацию каждый кадр.
+  state.verticalVelocity -= GRAVITY * delta;
+  // Перемещаем игрока вверх или вниз.
+  camera.position.y += state.verticalVelocity * delta;
+  // Проверяем площадку уже под новой горизонтальной позицией.
+  const landingHeight = getPlatformHeightAt(
+    camera.position.x,
+    camera.position.z,
+  );
+  // Проверяем приземление только при падении.
+  if (landingHeight !== undefined && state.verticalVelocity <= 0) {
+    // Вычисляем высоту камеры над площадкой.
+    const landingCameraY = landingHeight + GROUND_Y;
+    // Проверяем, достиг ли игрок уровня площадки.
+    if (camera.position.y <= landingCameraY) {
+      // Устанавливаем игрока на поверхность платформы.
+      camera.position.y = landingCameraY;
+      // Останавливаем падение.
+      state.verticalVelocity = 0;
+    }
   }
 }

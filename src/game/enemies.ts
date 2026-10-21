@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { GameState } from "./types";
 import { getCellAt } from "./map";
+
 type EnemyActions = {
   onPlayerDamaged: () => void;
   onPlayerDefeated: () => void;
