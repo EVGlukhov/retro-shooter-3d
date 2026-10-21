@@ -23,6 +23,13 @@ const AIR_ACCELERATION = 8; // Увеличение значения позво�
 // Задаём силу замедления игрока на земле без нажатых клавиш движения.
 const GROUND_FRICTION = 10; // Увеличение значения быстрее остановит игрока.
 
+// Завершаем игру, если игрок упал ниже этой высоты.
+const FALL_DEATH_Y = -5;
+
+type PlayerActions = {
+  onFell: () => void;
+};
+
 // Проверяем, может ли игрок занять позицию.
 function canStandAt(x: number, z: number): boolean {
   // Создаём список смещений углов вокруг центра игрока.
@@ -47,6 +54,7 @@ export function updatePlayer(
   camera: THREE.PerspectiveCamera,
   state: GameState,
   delta: number,
+  actions: PlayerActions,
 ): void {
   // Не перемещаем игрока во время меню или после завершения.
   if (!state.gameStarted || state.gameEnded) return;
@@ -182,5 +190,13 @@ export function updatePlayer(
       // Останавливаем падение.
       state.verticalVelocity = 0;
     }
+  }
+
+  // Проверяем, упал ли игрок ниже порога уровня.
+  if (camera.position.y < FALL_DEATH_Y) {
+    // Просим основной модуль завершить игру поражением.
+    actions.onFell();
+    // Прекращаем обновление игрока в этом кадре.
+    return;
   }
 }

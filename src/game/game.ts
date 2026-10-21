@@ -71,7 +71,16 @@ export function startGame(gameElement: HTMLElement): void {
     // Запоминает время текущего кадра для следующего вызова.
     previousTime = now;
     // Обновляет позицию игрока.
-    updatePlayer(world.camera, state, delta);
+    updatePlayer(world.camera, state, delta, {
+      onFell: () => {
+        // Устанавливаем здоровье в ноль при падении в яму.
+        state.playerHealth = 0;
+        // Обновляем отображение здоровья.
+        updateHud(state, ui);
+        // Показываем экран поражения.
+        finishGame(false);
+      },
+    });
     // Обновляет движение и атаки врагов.
     updateEnemies(world.camera, state, delta, {
       onPlayerDamaged: () => updateHud(state, ui),
