@@ -1,11 +1,34 @@
 import * as THREE from "three";
 import type { Enemy, GameState, GameUI, GameWorld } from "./types";
 import { updateHud } from "./hud";
+import { PALETTE } from "./palette";
 
 // Создаёт невидимый луч для поиска объекта под прицелом.
 const raycaster = new THREE.Raycaster();
 // Ограничивает максимальную дальность выстрела.
 raycaster.far = 25;
+
+// Создаёт эффект попадания на стене/враге.
+function spawnHitEffect(world: GameWorld, point: THREE.Vector3): void {
+  // Создаём эффект вспышки на месте попадания.
+  const effect = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1, 8, 8),
+    new THREE.MeshBasicMaterial({
+      color: PALETTE.ui.accent,
+      transparent: true,
+      opacity: 0.95,
+    }),
+  );
+
+  effect.position.copy(point);
+  world.scene.add(effect);
+
+  setTimeout(() => {
+    world.scene.remove(effect);
+    effect.geometry.dispose();
+    effect.material.dispose();
+  }, 80);
+}
 
 // Обрабатываем один выстрел.
 export function shoot(world: GameWorld, state: GameState, ui: GameUI): void {
@@ -36,11 +59,29 @@ export function shoot(world: GameWorld, state: GameState, ui: GameUI): void {
 
   // Находим ближайшее пересечение луча с целью.
   const hit = raycaster.intersectObjects(targets, false)[0];
+
+  if (!hit) return;
+
+  // Вспышка на месте попадания.
+  spawnHitEffect(world, hit.point);
+
   // Пытаемся получить данные врага с попавшего под луч объекта.
   const enemy = hit?.object.userData["enemy"] as Enemy | undefined;
 
   // Если луч не попал во врага, заканчиваем обработку.
   if (!enemy) return;
+
+  // Эффект при попадании по врагу.
+  const enemyMaterial = enemy.mesh.material as THREE.MeshStandardMaterial;
+  const originalColor = enemyMaterial.color.clone();
+
+  enemyMaterial.emissive = new THREE.Color(PALETTE.ui.accent);
+  enemyMaterial.color = new THREE.Color(PALETTE.ui.accent);
+
+  setTimeout(() => {
+    enemyMaterial.emissive = new THREE.Color(PALETTE.enemy.glow);
+    enemyMaterial.color.copy(originalColor);
+  }, 90);
 
   // Снимаем врагу одно очко здоровья.
   enemy.health -= 1;
