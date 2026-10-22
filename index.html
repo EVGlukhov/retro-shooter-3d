@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Retro Shooter</title>
+    <script type="module" crossorigin src="/assets/index-CskDKyFF.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-AIOjzz6j.css">
+  </head>
+  <body>
+    <main id="game"> <!-- Контейнер игры; сюда будет добавлен canvas Three.js. -->
+      
+      <div id="hud"> <!-- Контейнер интерфейса поверх 3D-сцены. -->
+        <div>Health: <span id="health">100</span></div> <!-- Показывает здоровье игрока. -->
+        <div>Ammo: <span id="ammo">20</span></div> <!-- Показывает оставшиеся патроны. -->
+        <div id="objective">Defeat enemies and find the exit</div> <!-- Показывает текущую цель. -->
+      </div>
+
+      <div id="crosshair">+</div> <!-- Прицел в центре экрана. -->
+      
+      <section id="overlay"> <!-- Стартовый экран и экран паузы/конца игры. -->
+        <div class="card"> <!-- Карточка с сообщением и кнопкой. -->
+          <h1 id="overlay-title">Retro Shooter</h1> <!-- Заголовок стартового экрана. -->
+          <p id="overlay-text"> <!-- Краткое описание управления. -->
+            EDSF to move, mouse to look, click to shoot.
+          </p>
+          <button id="start-button">Start game</button>
+        </div>
+      </section>
+    </main> <!-- Загружает TypeScript-файл игры через Vite. -->
+  </body>
+</html>
