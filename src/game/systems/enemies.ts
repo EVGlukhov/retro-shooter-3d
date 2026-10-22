@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import type { GameState } from "./types";
-import { getCellAt, getPlatformHeightAt } from "./map";
+import type { GameState } from "../state/types";
+import { getCellAt, getPlatformHeightAt } from "../world/map";
 
 type EnemyActions = {
   onPlayerDamaged(): void;

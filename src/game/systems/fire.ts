@@ -1,5 +1,5 @@
-import { PALETTE } from "./palette";
-import type { FirePitRect, GameState } from "./types";
+import { PALETTE } from "../config/palette";
+import type { FirePitRect, GameState } from "../state/types";
 import * as THREE from "three";
 
 import fireTextureUrl from "/textures/fire.png";

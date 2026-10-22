@@ -1,4 +1,4 @@
-import type { GameState, GameUI } from "./types";
+import type { GameState, GameUI } from "../state/types";
 
 /**
  * Находит HTML-элемент по ID и возвращает его в типизированном виде.

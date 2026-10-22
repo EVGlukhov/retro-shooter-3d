@@ -1,6 +1,6 @@
-import { getCellAt, getPlatformHeightAt } from "./map";
+import { getCellAt, getPlatformHeightAt } from "../world/map";
 import * as THREE from "three";
-import type { GameState } from "./types";
+import type { GameState } from "../state/types";
 
 // Задаём радиус игрока для проверки столкновения со стенами.
 const PLAYER_RADIUS = 0.2; // Увеличение значения отодвинет игрока от стен.

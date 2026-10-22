@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import type { GameWorld } from "./types";
-import { PALETTE } from "./palette";
+import type { GameWorld } from "../state/types";
+import { PALETTE } from "../config/palette";
 
 /**
  * Создаёт сцену, камеру и рендерер для игрового мира.

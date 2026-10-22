@@ -1,5 +1,7 @@
 import * as THREE from "three";
-import type { GameState, GameUI, GameWorld } from "./types";
+import { INPUT_MOUSE_SENSITIVITY } from "../config/constants";
+import { playFightSound } from "../audio/sounds";
+import type { GameState, GameUI, GameWorld } from "../state/types";
 
 type InputActions = {
   shoot: () => void;
@@ -20,11 +22,13 @@ export function setupInput(
   actions: InputActions,
 ): void {
   const { camera, renderer } = world;
+  let fightPlayed = false;
 
   // Реагируем на клик по кнопке запуска.
   ui.startButton.addEventListener("click", function () {
     if (state.gameEnded) {
       actions.resetLevel();
+      fightPlayed = false;
       requestAnimationFrame(() => {
         renderer.domElement.requestPointerLock();
       });
@@ -49,10 +53,16 @@ export function setupInput(
       ui.overlayText.textContent = "Press Continue to resume the game.";
       ui.startButton.textContent = "Continue game";
       ui.overlay.classList.remove("hidden");
+      return;
     }
 
     if (isLocked) {
       ui.overlay.classList.add("hidden");
+
+      if (!fightPlayed) {
+        fightPlayed = true;
+        playFightSound();
+      }
     }
   });
 
@@ -62,11 +72,10 @@ export function setupInput(
     if (!state.gameStarted) return;
 
     // Задаём чувствительность мыши.
-    const sensitivity = 0.005;
     // Изменяем угол взгляда влево/вправо.
-    state.yaw -= event.movementX * sensitivity;
+    state.yaw -= event.movementX * INPUT_MOUSE_SENSITIVITY;
     // Изменяем угол взгляда вверх/вниз.
-    state.pitch -= event.movementY * sensitivity;
+    state.pitch -= event.movementY * INPUT_MOUSE_SENSITIVITY;
 
     // Не позволяем смотреть точно вверх или вниз до переворота.
     const maxPitch = Math.PI / 2 - 0.05;

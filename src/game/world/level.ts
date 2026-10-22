@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { cellToWorld, MAP, PLATFORMS } from "./map";
-import { PALETTE } from "./palette";
-import type { Enemy, GameState } from "./types";
-import { addLavaPit } from "./fire";
+import { PALETTE } from "../config/palette";
+import type { Enemy, GameState } from "../state/types";
+import { addLavaPit } from "../systems/fire";
 
 import brickTextureUrl from "/textures/brick.png";
 import floorTextureUrl from "/textures/floor.jpg";
@@ -16,29 +16,6 @@ const floorTextures = new THREE.TextureLoader().load(floorTextureUrl);
 floorTextures.wrapS = THREE.RepeatWrapping;
 floorTextures.wrapT = THREE.RepeatWrapping;
 floorTextures.repeat.set(50, 50);
-
-/**
- * Создаёт пустое начальное состояние игры.
- * @returns Объект состояния игры со списками объектов и базовыми полями.
- */
-export function createGameState(): GameState {
-  return {
-    walls: [],
-    enemies: [],
-    pickups: [],
-    firePits: [],
-    playerHealth: 100,
-    ammo: 20,
-    gameStarted: false,
-    gameEnded: false,
-    yaw: 0,
-    pitch: 0,
-    keysDown: new Set<string>(),
-    exitPosition: new THREE.Vector2(),
-    verticalVelocity: 0,
-    horizontalVelocity: new THREE.Vector2(),
-  };
-}
 
 /**
  * Строит уровень: стены, врагов, предметы, выход и лавовые зоны.

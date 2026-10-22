@@ -1,7 +1,13 @@
 import * as THREE from "three";
-import type { Enemy, GameState, GameUI, GameWorld, HitEffect } from "./types";
-import { updateHud } from "./hud";
-import { PALETTE } from "./palette";
+import type {
+  Enemy,
+  GameState,
+  GameUI,
+  GameWorld,
+  HitEffect,
+} from "../state/types";
+import { updateHud } from "../ui/hud";
+import { PALETTE } from "../config/palette";
 
 // Создаёт невидимый луч для поиска объекта под прицелом.
 const raycaster = new THREE.Raycaster();
@@ -49,7 +55,7 @@ function spawnHitEffect(world: GameWorld, point: THREE.Vector3): void {
   }
 }
 
-export function updateHitEffects(world: GameWorld, delta: number): void {
+export function updateHitEffects(delta: number): void {
   for (const effect of hitEffects) {
     if (!effect.active) continue;
 

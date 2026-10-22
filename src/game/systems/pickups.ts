@@ -1,4 +1,4 @@
-import type { GameState, GameWorld } from "./types";
+import type { GameState, GameWorld } from "../state/types";
 
 type PickupActions = {
   onCollected: () => void;
