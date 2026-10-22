@@ -2,6 +2,10 @@ import { PALETTE } from "./palette";
 import type { FirePitRect, GameState } from "./types";
 import * as THREE from "three";
 
+import fireTextureUrl from "/textures/fire.png";
+import smokeTextureUrl from "/textures/smoke.png";
+import lavaTextureUrl from "/textures/lava.jpg";
+
 /**
  * Создаёт список прямоугольных зон с лавой и огнём по исходной арене.
  * @returns Массив областей, где должна быть активирована огненная опасность.
@@ -27,15 +31,15 @@ export const FIRE_PITS = buildFirePitsFromArena();
 const FLAME_COUNT_PER_LAVA_PIT = 8;
 const SMOKE_COUNT_PER_LAVA_PIT = 3;
 
-const fireTexture = new THREE.TextureLoader().load("/textures/fire.png");
+const fireTexture = new THREE.TextureLoader().load(fireTextureUrl);
 fireTexture.colorSpace = THREE.SRGBColorSpace;
 fireTexture.needsUpdate = true;
 
-const smokeTexture = new THREE.TextureLoader().load("/textures/smoke.png");
+const smokeTexture = new THREE.TextureLoader().load(smokeTextureUrl);
 smokeTexture.colorSpace = THREE.SRGBColorSpace;
 smokeTexture.needsUpdate = true;
 
-const lavaTexture = new THREE.TextureLoader().load("/textures/lava.jpg");
+const lavaTexture = new THREE.TextureLoader().load(lavaTextureUrl);
 lavaTexture.wrapS = THREE.RepeatWrapping;
 lavaTexture.wrapT = THREE.RepeatWrapping;
 lavaTexture.repeat.set(2, 2);

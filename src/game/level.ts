@@ -4,12 +4,15 @@ import { PALETTE } from "./palette";
 import type { Enemy, GameState } from "./types";
 import { addLavaPit } from "./fire";
 
-const brickTextures = new THREE.TextureLoader().load("/textures/brick.png");
+import brickTextureUrl from "/textures/brick.png";
+import floorTextureUrl from "/textures/floor.jpg";
+
+const brickTextures = new THREE.TextureLoader().load(brickTextureUrl);
 brickTextures.wrapS = THREE.RepeatWrapping;
 brickTextures.wrapT = THREE.RepeatWrapping;
 brickTextures.repeat.set(3, 3);
 
-const floorTextures = new THREE.TextureLoader().load("/textures/floor.jpg");
+const floorTextures = new THREE.TextureLoader().load(floorTextureUrl);
 floorTextures.wrapS = THREE.RepeatWrapping;
 floorTextures.wrapT = THREE.RepeatWrapping;
 floorTextures.repeat.set(50, 50);
