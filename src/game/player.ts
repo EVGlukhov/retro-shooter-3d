@@ -27,6 +27,9 @@ const GROUND_FRICTION = 10; // Увеличение значения быстр�
 const FALL_DEATH_Y = -12;
 const FALL_DROP_TO_DIE = 2;
 
+const jumpSound = new Audio("/sounds/jump.mp3");
+jumpSound.volume = 0.5;
+
 type PlayerActions = {
   onFell: () => void;
 };
@@ -101,6 +104,9 @@ export function updatePlayer(
     if (state.keysDown.has("Space")) {
       state.verticalVelocity = JUMP_SPEED;
       onGround = false;
+
+      jumpSound.currentTime = 0;
+      jumpSound.play().catch(() => {});
     }
   }
 
