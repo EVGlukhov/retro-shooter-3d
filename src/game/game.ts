@@ -9,6 +9,10 @@ import { updatePlayer } from "./player";
 import { createWorld } from "./world";
 import * as THREE from "three";
 
+/**
+ * Запускает основной игровой цикл и создаёт уровень, HUD, ввод и анимацию.
+ * @param gameElement Контейнер DOM, в который будет вставлен canvas игры.
+ */
 export function startGame(gameElement: HTMLElement): void {
   const ui = getGameUI();
   let world = createWorld(gameElement);
@@ -17,11 +21,14 @@ export function startGame(gameElement: HTMLElement): void {
   buildLevel(world.scene, world.camera, state);
   updateHud(state, ui);
 
+  /**
+   * Полностью пересоздаёт уровень и сбрасывает состояние игры.
+   */
   function resetLevel(): void {
     // Очищаем сцену от старого уровня.
     const objectsToRemove: THREE.Object3D[] = [];
 
-    world.scene.traverse((child) => {
+    world.scene.traverse((child: THREE.Object3D) => {
       if (
         child !== world.camera &&
         !(child instanceof THREE.Light) &&
@@ -67,6 +74,10 @@ export function startGame(gameElement: HTMLElement): void {
     ui.overlay.classList.add("hidden");
   }
 
+  /**
+   * Завершает игровую сессию и показывает экран победы или поражения.
+   * @param won true, если игрок победил, иначе false.
+   */
   function finishGame(won: boolean): void {
     // Не позволяем повторно завершить уже законченную игру.
     if (state.gameEnded) return;
@@ -95,6 +106,9 @@ export function startGame(gameElement: HTMLElement): void {
   });
 
   // Проверяет, добрался ли игрок до выхода после победы над врагами.
+  /**
+   * Проверяет, достиг ли игрок выхода и не пора ли завершить игру победой.
+   */
   function checkExit(): void {
     // Выход недоступен, пока игра не активна или враги живы.
     if (state.gameEnded || !state.gameStarted || state.enemies.length > 0)
@@ -115,6 +129,10 @@ export function startGame(gameElement: HTMLElement): void {
 
   let previousTime = performance.now();
 
+  /**
+   * Главный цикл анимации игрового кадра: обновляет игрока, врагов, предметы и рендер.
+   * @param now Текущее время в миллисекундах от начала запуска.
+   */
   function animate(now: number): void {
     // Просит браузер вызвать эту функцию перед следующим кадром.
     requestAnimationFrame(animate);

@@ -8,7 +8,11 @@ const raycaster = new THREE.Raycaster();
 // Ограничивает максимальную дальность выстрела.
 raycaster.far = 25;
 
-// Создаёт эффект попадания на стене/враге.
+/**
+ * Создаёт короткий визуальный эффект попадания в стену или врага.
+ * @param world Игровой мир, в котором отображается эффект.
+ * @param point Мировая точка попадания луча.
+ */
 function spawnHitEffect(world: GameWorld, point: THREE.Vector3): void {
   // Создаём эффект вспышки на месте попадания.
   const effect = new THREE.Mesh(
@@ -30,7 +34,12 @@ function spawnHitEffect(world: GameWorld, point: THREE.Vector3): void {
   }, 80);
 }
 
-// Обрабатываем один выстрел.
+/**
+ * Обрабатывает один выстрел игрока, проверяет попадание и уменьшает здоровье врага.
+ * @param world Игровой мир, в котором происходит выстрел.
+ * @param state Текущее состояние игры.
+ * @param ui Элементы интерфейса пользователя.
+ */
 export function shoot(world: GameWorld, state: GameState, ui: GameUI): void {
   // Не стреляем, если игра не идёт.
   if (!state.gameStarted || state.gameEnded) return;

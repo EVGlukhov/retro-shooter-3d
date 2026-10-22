@@ -8,7 +8,13 @@ type EnemyActions = {
   onEnemyDied(): void;
 };
 
-// Обновляем врагов каждый кадр.
+/**
+ * Обновляет поведение врагов каждый кадр: движение, атаки, падение и проверку смерти.
+ * @param camera Камера игрока, от которой считается позиция цели.
+ * @param state Текущее состояние игры.
+ * @param delta Время с предыдущего кадра в секундах.
+ * @param actions Колбэки для событий врагов.
+ */
 export function updateEnemies(
   camera: THREE.PerspectiveCamera,
   state: GameState,

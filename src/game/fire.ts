@@ -2,6 +2,10 @@ import { PALETTE } from "./palette";
 import type { FirePitRect, GameState } from "./types";
 import * as THREE from "three";
 
+/**
+ * Создаёт список прямоугольных зон с лавой и огнём по исходной арене.
+ * @returns Массив областей, где должна быть активирована огненная опасность.
+ */
 function buildFirePitsFromArena(): FirePitRect[] {
   return [
     { x: -8.2, z: 0, width: 5.4, depth: 5.6 },
@@ -36,6 +40,14 @@ lavaTexture.wrapS = THREE.RepeatWrapping;
 lavaTexture.wrapT = THREE.RepeatWrapping;
 lavaTexture.repeat.set(2, 2);
 
+/**
+ * Добавляет отдельную лавандую яму с лавовой плитой, огнём и дымом.
+ * @param scene Сцена, в которую добавляется эффект.
+ * @param state Текущее состояние игры.
+ * @param position Центр лавовой ямы в мировых координатах.
+ * @param width Ширина лавовой зоны.
+ * @param depth Глубина лавовой зоны.
+ */
 export function addLavaPit(
   scene: THREE.Scene,
   state: GameState,
@@ -117,9 +129,14 @@ export function addLavaPit(
   state.firePits.push(fireGroup);
 }
 
+/**
+ * Анимирует огонь, дым и свечение в лавовых ямах.
+ * @param state Текущее состояние игры.
+ * @param time Текущее время в миллисекундах для анимации.
+ */
 export function updateFirePits(state: GameState, time: number): void {
   for (const fireGroup of state.firePits) {
-    fireGroup.children.forEach((child, index) => {
+    fireGroup.children.forEach((child: THREE.Object3D, index: number) => {
       if (!(child instanceof THREE.Sprite)) return;
 
       const kind = child.userData.kind as string | undefined;

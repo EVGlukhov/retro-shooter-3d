@@ -4,7 +4,13 @@ type PickupActions = {
   onCollected: () => void;
 };
 
-// Проверяем, подобрал ли игрок предмет.
+/**
+ * Обновляет предметы-подборки: вращение, проверку дистанции и сбор игроком.
+ * @param world Игровой мир с камерой и сценой.
+ * @param state Текущее состояние игры.
+ * @param delta Время с предыдущего кадра в секундах.
+ * @param actions Колбэк при подборе предмета.
+ */
 export function updatePickups(
   world: GameWorld,
   state: GameState,

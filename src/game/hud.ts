@@ -1,6 +1,10 @@
 import type { GameState, GameUI } from "./types";
 
-// Создаём типизированный помощник для поиска HTML-элемента.
+/**
+ * Находит HTML-элемент по ID и возвращает его в типизированном виде.
+ * @param id Идентификатор элемента в DOM.
+ * @returns Найденный элемент с приведённым типом.
+ */
 function getElement<T extends HTMLElement>(id: string): T {
   const element = document.querySelector(`#${id}`);
 
@@ -11,6 +15,10 @@ function getElement<T extends HTMLElement>(id: string): T {
   return element as T;
 }
 
+/**
+ * Создаёт объект всех UI-элементов игрового HUD и меню.
+ * @returns Полный набор ссылок на элементы интерфейса.
+ */
 export function getGameUI(): GameUI {
   return {
     health: getElement<HTMLSpanElement>("health"), // Получаем поле HUD, где показывается здоровье.
@@ -23,6 +31,11 @@ export function getGameUI(): GameUI {
   };
 }
 
+/**
+ * Обновляет HUD: здоровье, патроны и текущую задачу игрока.
+ * @param state Текущее состояние игры.
+ * @param ui Элементы пользовательского интерфейса.
+ */
 export function updateHud(state: GameState, ui: GameUI): void {
   // Показывает здоровье, не позволяя отображать значение ниже нуля.
   ui.health.textContent = String(Math.max(0, state.playerHealth));

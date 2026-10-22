@@ -31,7 +31,12 @@ type PlayerActions = {
   onFell: () => void;
 };
 
-// Проверяем, может ли игрок занять позицию.
+/**
+ * Проверяет, может ли игрок занять указанную позицию без попадания в стену.
+ * @param x Координата X проверяемой позиции.
+ * @param z Координата Z проверяемой позиции.
+ * @returns true, если позиция свободна, иначе false.
+ */
 function canStandAt(x: number, z: number): boolean {
   // Создаём список смещений углов вокруг центра игрока.
   const corners: [number, number][] = [
@@ -50,7 +55,13 @@ function canStandAt(x: number, z: number): boolean {
   });
 }
 
-// Обновляем позицию игрока за один кадр.
+/**
+ * Обновляет состояние игрока за один кадр: движение, прыжок, гравитацию и смерть при падении.
+ * @param camera Камера игрока, которая хранит его мировую позицию.
+ * @param state Текущее состояние игры.
+ * @param delta Время с предыдущего кадра.
+ * @param actions Колбэки для событий падения.
+ */
 export function updatePlayer(
   camera: THREE.PerspectiveCamera,
   state: GameState,

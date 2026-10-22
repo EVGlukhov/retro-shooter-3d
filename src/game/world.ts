@@ -2,6 +2,11 @@ import * as THREE from "three";
 import type { GameWorld } from "./types";
 import { PALETTE } from "./palette";
 
+/**
+ * Создаёт сцену, камеру и рендерер для игрового мира.
+ * @param gameElement Контейнер DOM, в который будет добавлен canvas Three.js.
+ * @returns Объект игрового мира с сценой, камерой и рендерером.
+ */
 export function createWorld(gameElement: HTMLElement): GameWorld {
   // Создаём контейнер, в котором будут находиться 3D-объекты.
   const scene = new THREE.Scene();

@@ -14,6 +14,10 @@ floorTextures.wrapS = THREE.RepeatWrapping;
 floorTextures.wrapT = THREE.RepeatWrapping;
 floorTextures.repeat.set(50, 50);
 
+/**
+ * Создаёт пустое начальное состояние игры.
+ * @returns Объект состояния игры со списками объектов и базовыми полями.
+ */
 export function createGameState(): GameState {
   return {
     walls: [],
@@ -33,7 +37,12 @@ export function createGameState(): GameState {
   };
 }
 
-// Проходим по карте и создаёт соответствующие объекты.
+/**
+ * Строит уровень: стены, врагов, предметы, выход и лавовые зоны.
+ * @param scene Сцена, в которую добавляются объекты уровня.
+ * @param camera Камера игрока, которая получает стартовую позицию.
+ * @param state Текущее состояние игры.
+ */
 export function buildLevel(
   scene: THREE.Scene,
   camera: THREE.PerspectiveCamera,
@@ -80,6 +89,12 @@ export function buildLevel(
   }
 }
 
+/**
+ * Добавляет стену в сцену и сохраняет её в игровом состоянии.
+ * @param scene Сцена, куда добавляется стена.
+ * @param state Текущее состояние игры.
+ * @param position Позиция стены в мировом пространстве.
+ */
 function addWall(
   scene: THREE.Scene,
   state: GameState,
@@ -106,7 +121,12 @@ function addWall(
   state.walls.push(wall);
 }
 
-// Создаёт простого врага в клетке карты.
+/**
+ * Создаёт врага в указанной клетке карты.
+ * @param scene Сцена, в которую добавляется враг.
+ * @param state Текущее состояние игры.
+ * @param position Позиция создания врага.
+ */
 function addEnemy(
   scene: THREE.Scene,
   state: GameState,
@@ -142,7 +162,12 @@ function addEnemy(
   state.enemies.push(enemy);
 }
 
-// Создаёт коробку с патронами.
+/**
+ * Создаёт предмет с боеприпасами в клетке карты.
+ * @param scene Сцена, в которую добавляется предмет.
+ * @param state Текущее состояние игры.
+ * @param position Позиция предмета.
+ */
 function addAmmoPickup(
   scene: THREE.Scene,
   state: GameState,
@@ -164,7 +189,12 @@ function addAmmoPickup(
   // Сохраняет его для проверки сбора.
   state.pickups.push(pickup);
 }
-// Создаём видимую фиолетовую дверь.
+/**
+ * Создаёт выход из уровня и сохраняет его координаты для проверки победы.
+ * @param scene Сцена, в которую добавляется выход.
+ * @param state Текущее состояние игры.
+ * @param position Позиция выхода.
+ */
 function addExit(
   scene: THREE.Scene,
   state: GameState,

@@ -6,6 +6,13 @@ type InputActions = {
   resetLevel: () => void;
 };
 
+/**
+ * Настраивает обработчики ввода: мышь, клавиатуру, запуск и паузу.
+ * @param world Игровой мир, связанный с камерой и canvas.
+ * @param state Текущее состояние игры.
+ * @param ui Элементы HUD и меню.
+ * @param actions Действия, связанные с выстрелом и перезапуском уровня.
+ */
 export function setupInput(
   world: GameWorld,
   state: GameState,
