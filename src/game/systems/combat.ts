@@ -8,6 +8,7 @@ import type {
 } from "../state/types";
 import { updateHud } from "../ui/hud";
 import { PALETTE } from "../config/palette";
+import { fireRailgun } from "../world/railgun";
 
 // Создаёт невидимый луч для поиска объекта под прицелом.
 const raycaster = new THREE.Raycaster();
@@ -105,6 +106,14 @@ export function shoot(world: GameWorld, state: GameState, ui: GameUI): void {
 
   // Находим ближайшее пересечение луча с целью.
   const hit = raycaster.intersectObjects(targets, true)[0];
+
+  const aimPoint =
+    hit?.point ??
+    world.camera
+      .getWorldDirection(new THREE.Vector3())
+      .multiplyScalar(raycaster.far)
+      .add(world.camera.position);
+  fireRailgun(world.railgun, world.scene, world.camera, aimPoint);
 
   if (!hit) return;
 

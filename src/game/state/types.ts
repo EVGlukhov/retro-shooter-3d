@@ -12,6 +12,8 @@ export type Enemy = {
   mesh: THREE.Group;
   health: number;
   attackCooldown: number;
+  shootCooldown: number;
+  jumpCooldown: number;
   verticalVelocity: number;
   alive: boolean;
 };
@@ -36,6 +38,7 @@ export type Enemy = {
 export type GameState = {
   walls: THREE.Mesh[];
   enemies: Enemy[];
+  enemyProjectiles: EnemyProjectile[];
   pickups: THREE.Mesh[];
   firePits: THREE.Group[];
   playerHealth: number;
@@ -80,6 +83,7 @@ export type GameWorld = {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
+  railgun: THREE.Group;
 };
 
 /**
@@ -116,4 +120,11 @@ export type HitEffect = {
   mesh: THREE.Mesh;
   life: number;
   active: boolean;
+};
+
+export type EnemyProjectile = {
+  mesh: THREE.Mesh;
+  direction: THREE.Vector3;
+  speed: number;
+  life: number;
 };

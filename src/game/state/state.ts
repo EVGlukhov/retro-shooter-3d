@@ -5,6 +5,7 @@ export function createGameState(): GameState {
   return {
     walls: [],
     enemies: [],
+    enemyProjectiles: [],
     pickups: [],
     firePits: [],
     playerHealth: 100,

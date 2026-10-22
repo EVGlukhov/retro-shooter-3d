@@ -9,6 +9,7 @@ import { createGameState } from "../game/state/state";
 import { updatePickups } from "../game/systems/pickups";
 import { updatePlayer } from "../game/systems/player";
 import { createWorld } from "../game/world/createWorld";
+import { updateRailgun } from "../game/world/railgun";
 
 export class Game {
   world;
@@ -107,6 +108,8 @@ export class Game {
   }
 
   update(delta: number) {
+    updateRailgun(this.world.railgun, delta);
+
     updatePlayer(this.world.camera, this.state, delta, {
       onFell: () => {
         this.state.playerHealth = 0;

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { GameWorld } from "../state/types";
 import { PALETTE } from "../config/palette";
+import { createRailgun } from "./railgun";
 
 /**
  * Создаёт сцену, камеру и рендерер для игрового мира.
@@ -28,6 +29,7 @@ export function createWorld(gameElement: HTMLElement): GameWorld {
   camera.rotation.order = "YXZ";
   // Добавляем камеру в сцену.
   scene.add(camera);
+  const railgun = createRailgun(camera);
 
   // Создаём WebGL-рендерер с сглаживанием краёв.
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -62,5 +64,5 @@ export function createWorld(gameElement: HTMLElement): GameWorld {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  return { scene, camera, renderer };
+  return { scene, camera, renderer, railgun };
 }

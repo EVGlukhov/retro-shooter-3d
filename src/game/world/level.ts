@@ -143,6 +143,8 @@ function addEnemy(
     mesh, // Сохраняем его визуальный меш.
     health: 2, // Задаём два попадания до уничтожения.
     attackCooldown: 0, // Позволяем врагу атаковать сразу, когда он доберётся до игрока.
+    shootCooldown: 1 + Math.random() * 2,
+    jumpCooldown: 1 + Math.random() * 2,
     verticalVelocity: 0, // Изначально враг не двигается по вертикали.
     alive: true, // Враг жив при создании.
   };
