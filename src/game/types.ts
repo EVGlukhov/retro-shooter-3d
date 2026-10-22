@@ -13,6 +13,7 @@ export type GameState = {
   walls: THREE.Mesh[];
   enemies: Enemy[];
   pickups: THREE.Mesh[];
+  firePits: THREE.Group[];
   playerHealth: number;
   ammo: number;
   gameStarted: boolean;
@@ -48,4 +49,11 @@ export type Platform = {
   y: number; // Задаём высоту поверхности платформы.
   width: number; // Задаём ширину площадки вдоль оси X.
   depth: number; // Задаём глубину площадки вдоль оси Z.
+};
+
+export type FirePitRect = {
+  x: number;
+  z: number;
+  width: number;
+  depth: number;
 };

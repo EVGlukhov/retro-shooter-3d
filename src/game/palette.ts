@@ -22,6 +22,12 @@ export const PALETTE = {
     body: "#7c3aed",
     glow: "#35106f",
   },
+  fire: {
+    ember: "#ffd166",
+    orange: "#ff8c42",
+    red: "#ff3d00",
+    dark: "#2b1209",
+  },
   ui: {
     background: "#090b10",
     text: "#f4f4f5",

@@ -1,5 +1,6 @@
 import { shoot } from "./combot";
 import { updateEnemies } from "./enemies";
+import { updateFirePits } from "./fire";
 import { getGameUI, updateHud } from "./hud";
 import { setupInput } from "./input";
 import { buildLevel, createGameState } from "./level";
@@ -133,6 +134,7 @@ export function startGame(gameElement: HTMLElement): void {
         finishGame(false);
       },
     });
+    updateFirePits(state, now);
     // Обновляет движение и атаки врагов.
     updateEnemies(world.camera, state, delta, {
       onPlayerDamaged: () => updateHud(state, ui),

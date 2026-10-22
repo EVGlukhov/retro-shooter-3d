@@ -2,12 +2,24 @@ import * as THREE from "three";
 import { cellToWorld, MAP, PLATFORMS } from "./map";
 import { PALETTE } from "./palette";
 import type { Enemy, GameState } from "./types";
+import { addLavaPit } from "./fire";
+
+const brickTextures = new THREE.TextureLoader().load("/textures/brick.png");
+brickTextures.wrapS = THREE.RepeatWrapping;
+brickTextures.wrapT = THREE.RepeatWrapping;
+brickTextures.repeat.set(3, 3);
+
+const floorTextures = new THREE.TextureLoader().load("/textures/floor.jpg");
+floorTextures.wrapS = THREE.RepeatWrapping;
+floorTextures.wrapT = THREE.RepeatWrapping;
+floorTextures.repeat.set(50, 50);
 
 export function createGameState(): GameState {
   return {
     walls: [],
     enemies: [],
     pickups: [],
+    firePits: [],
     playerHealth: 100,
     ammo: 20,
     gameStarted: false,
@@ -33,6 +45,8 @@ export function buildLevel(
       new THREE.MeshStandardMaterial({
         color: PALETTE.world.floor,
         roughness: 0.9, // Делаем поверхность матовой.
+        map: floorTextures,
+        metalness: 0.05,
       }), // Создаёт матовый серый материал пола.
     );
 
@@ -53,6 +67,8 @@ export function buildLevel(
         addWall(scene, state, position);
       } else if (cell === "E") {
         addEnemy(scene, state, position);
+      } else if (cell === "L") {
+        addLavaPit(scene, state, position, 1, 2);
       } else if (cell === "A") {
         addAmmoPickup(scene, state, position);
       } else if (cell === "X") {
@@ -73,6 +89,7 @@ function addWall(
   const wallMaterial = new THREE.MeshStandardMaterial({
     color: PALETTE.world.wall, // Задаём серо-фиолетовый цвет.
     roughness: 0.9, // Делает поверхность почти матовой.
+    map: brickTextures,
   });
 
   // Объединяем геометрию стены и её материал в один объект.
