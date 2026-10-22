@@ -30,6 +30,10 @@ const FALL_DROP_TO_DIE = 2;
 const jumpSound = new Audio("/sounds/jump.mp3");
 jumpSound.volume = 0.5;
 
+const tForward = new THREE.Vector2();
+const tRight = new THREE.Vector2();
+const tDirection = new THREE.Vector2();
+
 type PlayerActions = {
   onFell: () => void;
 };
@@ -111,36 +115,36 @@ export function updatePlayer(
   }
 
   // Рассчитываем направление вперёд с учётом поворота.
-  const forward = new THREE.Vector2(-Math.sin(state.yaw), -Math.cos(state.yaw));
+  tForward.set(-Math.sin(state.yaw), -Math.cos(state.yaw));
   // Рассчитываем направление вправо.
-  const right = new THREE.Vector2(Math.cos(state.yaw), -Math.sin(state.yaw));
+  tRight.set(Math.cos(state.yaw), -Math.sin(state.yaw));
 
   // Создаём пустой вектор желаемого движения от клавиш.
-  const wishDirection = new THREE.Vector2();
+  tDirection.set(0, 0);
 
   // Добавляем движение вперёд при зажатой W.
-  if (state.keysDown.has("KeyE")) wishDirection.add(forward);
+  if (state.keysDown.has("KeyE")) tDirection.add(tForward);
   // Добавляем движение назад при зажатой S.
-  if (state.keysDown.has("KeyD")) wishDirection.sub(forward);
+  if (state.keysDown.has("KeyD")) tDirection.sub(tForward);
   // Добавляем движение вправо при зажатой D.
-  if (state.keysDown.has("KeyF")) wishDirection.add(right);
+  if (state.keysDown.has("KeyF")) tDirection.add(tRight);
   // Добавляем движение влево при зажатой A.
-  if (state.keysDown.has("KeyS")) wishDirection.sub(right);
+  if (state.keysDown.has("KeyS")) tDirection.sub(tRight);
 
   // Рассчитываем скорость, если нажата хотя бы одна клавиша движения.
-  if (wishDirection.lengthSq() > 0) {
-    wishDirection.normalize(); // Нормализуем направление, чтобы диагональ не давала бесплатное ускорение.
+  if (tDirection.lengthSq() > 0) {
+    tDirection.normalize(); // Нормализуем направление, чтобы диагональ не давала бесплатное ускорение.
 
     // Применяем обычное движение, когда игрок стоит на земле.
     if (onGround) {
       // Устанавливаем скорость в направлении нажатых клавиш.
       state.horizontalVelocity
-        .copy(wishDirection)
+        .copy(tDirection)
         .multiplyScalar(MAX_GROUND_SPEED);
     } else {
       // Измеряем текущую скорость в желаемом направлении.
       const currentSpeedInWishDirection =
-        state.horizontalVelocity.dot(wishDirection);
+        state.horizontalVelocity.dot(tDirection);
       // Вычисляем, сколько скорости ещё можно добавить в этом направлении.
       const speedToAdd = MAX_GROUND_SPEED - currentSpeedInWishDirection;
 
@@ -149,7 +153,7 @@ export function updatePlayer(
         // Ограничиваем ускорение временем кадра и оставшейся скоростью.
         const acceleration = Math.min(AIR_ACCELERATION * delta, speedToAdd);
         // Добавляем ускорение, сохраняя уже набранную скорость.
-        state.horizontalVelocity.addScaledVector(wishDirection, acceleration);
+        state.horizontalVelocity.addScaledVector(tDirection, acceleration);
       }
     }
   } else if (onGround) {

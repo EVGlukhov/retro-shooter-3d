@@ -37,13 +37,24 @@ export function getGameUI(): GameUI {
  * @param ui Элементы пользовательского интерфейса.
  */
 export function updateHud(state: GameState, ui: GameUI): void {
-  // Показывает здоровье, не позволяя отображать значение ниже нуля.
-  ui.health.textContent = String(Math.max(0, state.playerHealth));
-  // Показывает количество патронов.
-  ui.ammo.textContent = String(state.ammo);
+  const healthText = String(Math.max(0, state.playerHealth));
+  const ammoText = String(state.ammo);
 
-  ui.objective.textContent =
+  if (ui.health.textContent !== healthText) {
+    // Показывает здоровье, не позволяя отображать значение ниже нуля.
+    ui.health.textContent = healthText;
+  }
+  if (ui.ammo.textContent !== ammoText) {
+    // Показывает количество патронов.
+    ui.ammo.textContent = ammoText;
+  }
+
+  const objectiveText =
     state.enemies.length > 0 // Проверяет, остались ли враги.
       ? `Enemies remaining: ${state.enemies.length}` // Если остались, показывает их количество.
       : "Enemies defeated - find the purple exit"; // Иначе направляет игрока к выходу.
+
+  if (ui.objective.textContent !== objectiveText) {
+    ui.objective.textContent = objectiveText;
+  }
 }

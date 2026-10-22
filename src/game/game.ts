@@ -1,4 +1,4 @@
-import { shoot } from "./combot";
+import { shoot, updateHitEffects } from "./combot";
 import { updateEnemies } from "./enemies";
 import { updateFirePits } from "./fire";
 import { getGameUI, updateHud } from "./hud";
@@ -159,6 +159,7 @@ export function startGame(gameElement: HTMLElement): void {
       onPlayerDefeated: () => finishGame(false),
       onEnemyDied: () => updateHud(state, ui),
     });
+    updateHitEffects(world, delta);
     // Вращает предметы и проверяет их сбор.
     updatePickups(world, state, delta, {
       onCollected: () => updateHud(state, ui),

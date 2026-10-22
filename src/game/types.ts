@@ -111,3 +111,9 @@ export type FirePitRect = {
   width: number;
   depth: number;
 };
+
+export type HitEffect = {
+  mesh: THREE.Mesh;
+  life: number;
+  active: boolean;
+};

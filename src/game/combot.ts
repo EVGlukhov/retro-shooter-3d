@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { Enemy, GameState, GameUI, GameWorld } from "./types";
+import type { Enemy, GameState, GameUI, GameWorld, HitEffect } from "./types";
 import { updateHud } from "./hud";
 import { PALETTE } from "./palette";
 
@@ -8,6 +8,28 @@ const raycaster = new THREE.Raycaster();
 // Ограничивает максимальную дальность выстрела.
 raycaster.far = 25;
 
+const hitEffects: HitEffect[] = [];
+
+function getHitEffect(): HitEffect {
+  let effect = hitEffects.find((item) => !item.active);
+
+  if (!effect) {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.1, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: PALETTE.ui.accent,
+        transparent: true,
+        opacity: 0.95,
+      }),
+    );
+
+    effect = { mesh, life: 0, active: false };
+    hitEffects.push(effect);
+  }
+
+  return effect;
+}
+
 /**
  * Создаёт короткий визуальный эффект попадания в стену или врага.
  * @param world Игровой мир, в котором отображается эффект.
@@ -15,23 +37,32 @@ raycaster.far = 25;
  */
 function spawnHitEffect(world: GameWorld, point: THREE.Vector3): void {
   // Создаём эффект вспышки на месте попадания.
-  const effect = new THREE.Mesh(
-    new THREE.SphereGeometry(0.1, 8, 8),
-    new THREE.MeshBasicMaterial({
-      color: PALETTE.ui.accent,
-      transparent: true,
-      opacity: 0.95,
-    }),
-  );
+  const effect = getHitEffect();
 
-  effect.position.copy(point);
-  world.scene.add(effect);
+  effect.mesh.position.copy(point);
+  effect.mesh.visible = true;
+  effect.life = 0.08;
+  effect.active = true;
 
-  setTimeout(() => {
-    world.scene.remove(effect);
-    effect.geometry.dispose();
-    effect.material.dispose();
-  }, 80);
+  if (!world.scene.children.includes(effect.mesh)) {
+    world.scene.add(effect.mesh);
+  }
+}
+
+export function updateHitEffects(world: GameWorld, delta: number): void {
+  for (const effect of hitEffects) {
+    if (!effect.active) continue;
+
+    effect.life -= delta;
+    if (effect.life <= 0) {
+      effect.active = false;
+      effect.mesh.visible = false;
+      continue;
+    }
+
+    const material = effect.mesh.material as THREE.MeshBasicMaterial;
+    material.opacity = Math.max(0, effect.life / 0.08);
+  }
 }
 
 /**
