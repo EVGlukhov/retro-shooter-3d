@@ -2,9 +2,7 @@ import { PALETTE } from "../config/palette";
 import type { FirePitRect, GameState } from "../state/types";
 import * as THREE from "three";
 
-import fireTextureUrl from "/textures/fire.png";
-import smokeTextureUrl from "/textures/smoke.png";
-import lavaTextureUrl from "/textures/lava.jpg";
+const assetBaseUrl = import.meta.env.BASE_URL;
 
 /**
  * Создаёт список прямоугольных зон с лавой и огнём по исходной арене.
@@ -31,15 +29,21 @@ export const FIRE_PITS = buildFirePitsFromArena();
 const FLAME_COUNT_PER_LAVA_PIT = 8;
 const SMOKE_COUNT_PER_LAVA_PIT = 3;
 
-const fireTexture = new THREE.TextureLoader().load(fireTextureUrl);
+const fireTexture = new THREE.TextureLoader().load(
+  `${assetBaseUrl}textures/fire.png`,
+);
 fireTexture.colorSpace = THREE.SRGBColorSpace;
 fireTexture.needsUpdate = true;
 
-const smokeTexture = new THREE.TextureLoader().load(smokeTextureUrl);
+const smokeTexture = new THREE.TextureLoader().load(
+  `${assetBaseUrl}textures/smoke.png`,
+);
 smokeTexture.colorSpace = THREE.SRGBColorSpace;
 smokeTexture.needsUpdate = true;
 
-const lavaTexture = new THREE.TextureLoader().load(lavaTextureUrl);
+const lavaTexture = new THREE.TextureLoader().load(
+  `${assetBaseUrl}textures/lava.jpg`,
+);
 lavaTexture.wrapS = THREE.RepeatWrapping;
 lavaTexture.wrapT = THREE.RepeatWrapping;
 lavaTexture.repeat.set(2, 2);

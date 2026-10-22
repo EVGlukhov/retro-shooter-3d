@@ -9,7 +9,7 @@
 import * as THREE from "three";
 
 export type Enemy = {
-  mesh: THREE.Mesh;
+  mesh: THREE.Group;
   health: number;
   attackCooldown: number;
   verticalVelocity: number;

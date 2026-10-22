@@ -4,15 +4,20 @@ import { PALETTE } from "../config/palette";
 import type { Enemy, GameState } from "../state/types";
 import { addLavaPit } from "../systems/fire";
 
-import brickTextureUrl from "/textures/brick.png";
-import floorTextureUrl from "/textures/floor.jpg";
+import { createTankModel, type TankVariant } from "./tankModels";
 
-const brickTextures = new THREE.TextureLoader().load(brickTextureUrl);
+const assetBaseUrl = import.meta.env.BASE_URL;
+
+const brickTextures = new THREE.TextureLoader().load(
+  `${assetBaseUrl}textures/brick.png`,
+);
 brickTextures.wrapS = THREE.RepeatWrapping;
 brickTextures.wrapT = THREE.RepeatWrapping;
 brickTextures.repeat.set(3, 3);
 
-const floorTextures = new THREE.TextureLoader().load(floorTextureUrl);
+const floorTextures = new THREE.TextureLoader().load(
+  `${assetBaseUrl}textures/floor.jpg`,
+);
 floorTextures.wrapS = THREE.RepeatWrapping;
 floorTextures.wrapT = THREE.RepeatWrapping;
 floorTextures.repeat.set(50, 50);
@@ -64,6 +69,8 @@ export function buildLevel(
         addExit(scene, state, position);
       } else if (cell === "P") {
         camera.position.set(position.x, 1.3, position.z);
+        camera.rotation.y = Math.PI;
+        state.yaw = Math.PI;
       }
     }
   }
@@ -112,8 +119,12 @@ function addEnemy(
   state: GameState,
   position: THREE.Vector3,
 ): void {
-  // Создаём визуальное тело врага.
-  const mesh = new THREE.Mesh(
+  const variants: TankVariant[] = ["red", "blue", "default"]; // Создаём список доступных вариантов танка.
+  const variant = variants[Math.floor(Math.random() * variants.length)]; // Случайно выбираем вариант танка.
+  // Создаём корневую группу врага.
+  const mesh = new THREE.Group();
+  // Создаём временный куб на время загрузки модели.
+  const placeholder = new THREE.Mesh(
     new THREE.BoxGeometry(0.65, 1.25, 0.65), // Используем прямоугольный параллелепипед как временную модель врага.
     new THREE.MeshStandardMaterial({
       // Создаём материал врага.
@@ -122,8 +133,10 @@ function addEnemy(
     }),
   );
 
-  // Ставим центр модели на половине её высоты.
+  // Размещаем корень врага на высоте его центра.
   mesh.position.set(position.x, 0.625, position.z);
+  // Добавляем временный куб в группу врага.
+  mesh.add(placeholder);
 
   // Создаём игровые характеристики врага.
   const enemy: Enemy = {
@@ -140,6 +153,20 @@ function addEnemy(
   scene.add(mesh);
   // Добавляем врага в список активных врагов.
   state.enemies.push(enemy);
+
+  void createTankModel(variant)
+    .then((model) => {
+      // Пропускаем врага, если его уже удалили.
+      if (!state.enemies.includes(enemy)) return;
+      // Удаляем временный куб.
+      mesh.remove(placeholder);
+      // Добавляем модель танка в группу врага.
+      mesh.add(model);
+    })
+    .catch((error: unknown) => {
+      // Выводим сообщение об ошибке в консоль.
+      console.error(`Не удалось загрузить вариант танка ${variant}.`, error);
+    });
 }
 
 /**

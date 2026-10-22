@@ -1,7 +1,7 @@
-const fightSound = new Audio("/sounds/fight.mp3");
+const fightSound = new Audio(`${import.meta.env.BASE_URL}sounds/fight.mp3`);
 fightSound.volume = 0.5;
 
-const jumpSound = new Audio("/sounds/jump.mp3");
+const jumpSound = new Audio(`${import.meta.env.BASE_URL}sounds/jump.mp3`);
 jumpSound.volume = 0.5;
 
 export function playFightSound(): void {

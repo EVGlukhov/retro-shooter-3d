@@ -22,7 +22,7 @@ export function updateEnemies(
   actions: EnemyActions,
 ): void {
   // Нужно идти по копии массива, потому что некоторых врагов можно удалить.
-  for (const enemy of [...state.enemies]) {
+  for (const enemy of state.enemies) {
     if (!enemy.alive) continue; // Пропускаем мёртвых врагов.
 
     // Уменьшаем оставшееся время до следующей атаки.
@@ -115,6 +115,49 @@ export function updateEnemies(
         actions.onPlayerDefeated();
         // Не продолжает обработку других врагов после окончания.
         return;
+      }
+    }
+
+    // Задаём минимальное расстояние между врагами.
+    const minimumEnemySpacing = 1.2;
+
+    // Раздвигаем врагов, если их модели пересекаются.
+    for (const other of state.enemies) {
+      // Пропускаем самого себя и погибших врагов.
+      if (other === enemy || !other.alive) continue;
+
+      // Вычисляем смещение до другого врага по горизонтали.
+      let offsetX = enemy.mesh.position.x - other.mesh.position.x;
+      let offsetZ = enemy.mesh.position.z - other.mesh.position.z;
+      let spacing = Math.hypot(offsetX, offsetZ);
+
+      // Разводим врагов в разные стороны, если они стоят в одной точке.
+      if (spacing === 0) {
+        const direction =
+          state.enemies.indexOf(enemy) < state.enemies.indexOf(other) ? -1 : 1;
+        offsetX = direction;
+        offsetZ = 0;
+        spacing = 1;
+      }
+
+      // Не меняем положение, если враги уже разнесены.
+      if (spacing >= minimumEnemySpacing) continue;
+
+      // Вычисляем, насколько нужно отодвинуть этого врага.
+      const pushDistance = minimumEnemySpacing - spacing;
+      const pushedX =
+        enemy.mesh.position.x + (offsetX / spacing) * pushDistance;
+      const pushedZ =
+        enemy.mesh.position.z + (offsetZ / spacing) * pushDistance;
+
+      // Не двигаем врага сквозь стену по X.
+      if (getCellAt(pushedX, enemy.mesh.position.z) !== "#") {
+        enemy.mesh.position.x = pushedX;
+      }
+
+      // Не двигаем врага сквозь стену по Z.
+      if (getCellAt(enemy.mesh.position.x, pushedZ) !== "#") {
+        enemy.mesh.position.z = pushedZ;
       }
     }
 

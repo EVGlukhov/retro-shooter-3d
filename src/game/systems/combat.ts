@@ -104,29 +104,68 @@ export function shoot(world: GameWorld, state: GameState, ui: GameUI): void {
   ];
 
   // Находим ближайшее пересечение луча с целью.
-  const hit = raycaster.intersectObjects(targets, false)[0];
+  const hit = raycaster.intersectObjects(targets, true)[0];
 
   if (!hit) return;
 
   // Вспышка на месте попадания.
   spawnHitEffect(world, hit.point);
 
-  // Пытаемся получить данные врага с попавшего под луч объекта.
-  const enemy = hit?.object.userData["enemy"] as Enemy | undefined;
+  // Начинаем поиск с меша, в который попал луч.
+  let hitObject: THREE.Object3D | null = hit.object;
+  // Создаём переменную для найденного врага.
+  let enemy: Enemy | undefined;
 
-  // Если луч не попал во врага, заканчиваем обработку.
+  // Ищем данные врага в объекте и его родителях.
+  while (hitObject && !enemy) {
+    // Проверяем текущий объект на данные врага.
+    enemy = hitObject.userData["enemy"] as Enemy | undefined;
+    // Переходим к родительскому объекту.
+    hitObject = hitObject.parent;
+  }
+
+  // Заканчиваем обработку, если луч попал не во врага.
   if (!enemy) return;
 
-  // Эффект при попадании по врагу.
-  const enemyMaterial = enemy.mesh.material as THREE.MeshStandardMaterial;
-  const originalColor = enemyMaterial.color.clone();
+  // Создаём список исходных цветов материалов.
+  const flashedMaterials: {
+    material: THREE.MeshStandardMaterial;
+    color: THREE.Color;
+    emissive: THREE.Color;
+  }[] = [];
 
-  enemyMaterial.emissive = new THREE.Color(PALETTE.ui.accent);
-  enemyMaterial.color = new THREE.Color(PALETTE.ui.accent);
+  // Проходим по всем объектам модели врага.
+  enemy.mesh.traverse((object) => {
+    // Пропускаем объекты, которые не являются мешами.
+    if (!(object instanceof THREE.Mesh)) return;
+    // Получаем материалы текущего меша.
+    const materials = Array.isArray(object.material)
+      ? object.material
+      : [object.material];
 
+    // Перебираем материалы меша.
+    for (const material of materials) {
+      // Пропускаем материалы другого типа.
+      if (!(material instanceof THREE.MeshStandardMaterial)) continue;
+      // Сохраняем исходные цвета материала.
+      flashedMaterials.push({
+        material,
+        color: material.color.clone(),
+        emissive: material.emissive.clone(),
+      });
+      // Подсвечиваем материал цветом попадания.
+      material.color.set(PALETTE.ui.accent);
+      // Подсвечиваем свечение материала.
+      material.emissive.set(PALETTE.ui.accent);
+    }
+  });
+  // Запускаем восстановление цветов после вспышки.
   setTimeout(() => {
-    enemyMaterial.emissive = new THREE.Color(PALETTE.enemy.glow);
-    enemyMaterial.color.copy(originalColor);
+    // Перебираем подсвеченные материалы.
+    for (const entry of flashedMaterials) {
+      entry.material.color.copy(entry.color); // Восстанавливаем исходный цвет материала.
+      entry.material.emissive.copy(entry.emissive); // Восстанавливаем исходное свечение материала.
+    }
   }, 90);
 
   // Снимаем врагу одно очко здоровья.

@@ -27,7 +27,7 @@ const GROUND_FRICTION = 10; // Увеличение значения быстр�
 const FALL_DEATH_Y = -12;
 const FALL_DROP_TO_DIE = 2;
 
-const jumpSound = new Audio("/sounds/jump.mp3");
+const jumpSound = new Audio(`${import.meta.env.BASE_URL}sounds/jump.mp3`);
 jumpSound.volume = 0.5;
 
 const tForward = new THREE.Vector2();
